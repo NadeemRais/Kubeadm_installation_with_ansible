@@ -1,0 +1,63 @@
+---
+##### Install kubeadm, kubelet, and kubectl (Run it on MASTER & WORKER Nodes) ############
+- name: Run apt-get update
+  command: apt-get update
+  changed_when: false
+
+- name: Install packages
+  command: apt-get install -y apt-transport-https curl
+
+- name: Add GPG key
+  shell: curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
+- name: "Add Kubernetes repository"
+  lineinfile:
+    path: /etc/apt/sources.list.d/kubernetes.list
+    line: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+    create: yes
+
+
+- name: Update package cache
+  apt:
+    update_cache: yes
+
+- name: Install kubelet, kubeadm, kubectl
+  apt:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+    update_cache: yes
+
+- name: Mark kubelet, kubeadm, kubectl as held
+  apt:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl  
+    state: present
+    dpkg_options: "hold"
+
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Enable kubelet service
+  systemd:
+    name: kubelet
+    state: started
+    enabled: yes
+
+- name: Restart kubelet service
+  systemd:
+    name: kubelet
+    state: restarted
+
+# - name: Check kubelet service status
+#   systemd:
+#     name: kubelet
+#     state: status  
+
+

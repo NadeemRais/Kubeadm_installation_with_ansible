@@ -1,0 +1,14 @@
+--- 
+- name: Copy join command from Ansiblehost to the worker nodes.
+  copy:
+    src: /tmp/kubernetes_join_command.sh
+    dest: /tmp/kubernetes_join_command.sh
+    mode: 0777
+
+- name: Join the Worker nodes to the cluster.
+  shell:  /tmp/kubernetes_join_command.sh
+  register: joined_or_not
+
+- name: Display inventory hostname
+  debug:
+    var: inventory_hostname

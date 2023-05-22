@@ -1,0 +1,47 @@
+---
+- name: "Run kubeadm init"
+  command: |
+    kubeadm init --pod-network-cidr=10.0.0.0/16
+  
+
+- name: create .kube directory
+  become: true
+  become_user: ubuntu
+  file:
+    path: $HOME/.kube
+    state: directory
+    mode: 0755
+- name: Check admin.conf file exists.
+  stat:
+    path: /etc/kubernetes/admin.conf
+  register: k8s_conf
+
+- name: copy admin.conf to user's kube config
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/ubuntu/.kube/config
+    remote_src: yes
+    owner: ubuntu
+  when: k8s_conf.stat.exists
+
+
+- name: Get join command
+  shell: kubeadm token create --print-join-command
+  register: kubernetes_join_command
+
+- debug:
+      msg: "{{ kubernetes_join_command.stdout }}"
+
+- name: Copy join command to local file.
+  become: true
+  local_action: copy content="{{ kubernetes_join_command.stdout_lines[0] }}" dest="/tmp/kubernetes_join_command.sh" mode=0777      
+
+
+
+
+
+
+
+
+
+  

@@ -1,0 +1,19 @@
+---
+- name: "kubeadm installation"
+  hosts: master, node
+  become: true
+  roles:
+  - user
+  - network-config
+  - docker
+  - kubeadm-component
+  - role: master-node-component
+    when: inventory_hostname in groups['master']
+  - role: worker-node-component
+    when: inventory_hostname  in groups['node']  
+ 
+  
+  
+   
+
+ 

@@ -1,0 +1,34 @@
+---
+- name: Disable swap and update fstab
+  shell: |
+    swapoff -a
+    sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
+- name: Check br_netfilter kernel module
+  shell: lsmod | grep -w br_netfilter
+  register: br_netfilter_result
+  changed_when: false
+  ignore_errors: true
+
+- name: Load br_netfilter kernel module
+  shell: modprobe br_netfilter
+  when: br_netfilter_result.rc != 0
+
+- name: Display br_netfilter result
+  debug:
+    var: br_netfilter_result.stdout
+
+- name: Configure sysctl settings
+  shell: |
+    cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+    net.bridge.bridge-nf-call-ip6tables = 1
+    net.bridge.bridge-nf-call-iptables = 1
+    EOF
+
+- name: restart system
+  command: sysctl --system
+
+
+
+
+    

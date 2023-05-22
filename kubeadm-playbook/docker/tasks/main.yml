@@ -1,0 +1,56 @@
+######### docker installation all node (master and worker) #############
+---
+- name: Update package manager
+  apt:
+    update_cache: yes
+
+- name: Install Docker
+  apt:
+    name: docker.io
+    state: present
+
+- name: Start Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Copy shell script
+  copy:
+    src: /home/ubuntu/kubeadm-playbook/docker/docker-config.sh
+    dest: /home/ubuntu
+    mode: 0777
+
+- name: Execute docker-config.sh file
+  command: sh /home/ubuntu/docker-config.sh
+      
+      
+############### Enable, Restart the docker  service ############     
+- name: Reload systemd configuration
+  systemd:
+    daemon_reload: yes
+
+- name: Enable Docker service
+  systemd:
+    name: docker
+    enabled: yes
+
+- name: Restart Docker service
+  systemd:
+    name: docker
+    state: restarted
+
+- name: Check Docker service status
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+  register: docker_status
+
+# - name: Display Docker service status
+#   debug:
+#     var: docker_status
+  
+   
+
+
