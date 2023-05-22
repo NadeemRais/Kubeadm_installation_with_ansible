@@ -3,7 +3,6 @@
   hosts: master, node
   become: true
   roles:
-  - user
   - network-config
   - docker
   - kubeadm-component
